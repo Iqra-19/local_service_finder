@@ -1,0 +1,151 @@
+/* Light Theme Glassmorphism for Auth - Consistent with Dashboard */
+body.auth-body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    position: relative;
+    padding: 3rem 0;
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    color: #212529; /* Dark text for light theme */
+}
+
+/* Ambient soft glowing orbs */
+body.auth-body::before, body.auth-body::after {
+    content: '';
+    position: absolute;
+    width: 40vw;
+    height: 40vw;
+    max-width: 500px;
+    max-height: 500px;
+    border-radius: 50%;
+    z-index: 1;
+    filter: blur(80px);
+    opacity: 0.6;
+}
+body.auth-body::before {
+    top: -10%;
+    left: -10%;
+    background: linear-gradient(45deg, #a1c4fd 0%, #c2e9fb 100%);
+}
+body.auth-body::after {
+    bottom: -10%;
+    right: -10%;
+    background: linear-gradient(45deg, #fdcbf1 0%, #e6dee9 100%);
+}
+
+.auth-wrapper {
+    width: 100%;
+    max-width: 450px;
+    z-index: 2;
+    padding: 0 1rem;
+}
+
+.auth-wrapper.auth-register {
+    max-width: 550px;
+}
+
+/* Light Glass Card Core */
+.glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+    border-radius: 1.5rem;
+    color: #333;
+    overflow: hidden;
+}
+
+/* Typography */
+.glass-card h2, .glass-card h3 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
+}
+
+/* Custom Input Styling inside Light Glass */
+.glass-card .form-floating > .form-control,
+.glass-card .form-floating > .form-select {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #212529;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.glass-card .form-floating > .form-control:focus,
+.glass-card .form-floating > .form-select:focus {
+    background: #ffffff;
+    border-color: #0d6efd;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.25);
+    color: #212529;
+}
+
+.glass-card .form-floating > label {
+    color: #6c757d;
+}
+
+.glass-card .form-control::placeholder {
+    color: transparent;
+}
+
+.glass-card .form-select option {
+    background: #ffffff;
+    color: #212529;
+}
+
+/* Auth Buttons - Using Dashboard's Primary Blue feeling */
+.btn-glass {
+    background: #0d6efd; 
+    border: 1px solid #0b5ed7;
+    color: #fff;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+}
+
+.btn-glass:hover, .btn-glass:focus {
+    background: #0b5ed7;
+    border-color: #0a58ca;
+    transform: translateY(-2px);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+}
+
+.btn-glass.disabled, .btn-glass:disabled {
+    opacity: 0.7;
+    pointer-events: none;
+    transform: none;
+}
+
+/* Links inside Glass */
+.glass-card a {
+    color: #0d6efd;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.glass-card a:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Glass Alerts - Light Mode styles */
+.alert-glass-danger {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+    color: #842029;
+}
+.alert-glass-success {
+    background: rgba(25, 135, 84, 0.1);
+    border: 1px solid rgba(25, 135, 84, 0.2);
+    color: #0f5132;
+}
+
+/* Strength Meter Customization */
+#strengthMeter {
+    transition: width 0.4s ease, background-color 0.4s ease;
+}
