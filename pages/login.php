@@ -16,6 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    if ($_SESSION['login_lockout'] > 0 && $_SESSION['login_lockout'] < time()) {
+        $_SESSION['login_attempts'] = 0;
+        $_SESSION['login_lockout'] = 0;
+    }
+
     if ($_SESSION['login_lockout'] > time()) {
         $remaining = ceil(($_SESSION['login_lockout'] - time()) / 60);
         $error = "Too many failed attempts. Try again in $remaining minute(s).";

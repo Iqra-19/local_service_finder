@@ -7,9 +7,16 @@ function isLoggedIn(): bool {
     return isset($_SESSION['user_id']);
 }
 
+function getBaseUrl(): string {
+    $docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+    $dir = str_replace('\\', '/', dirname(__DIR__));
+    $baseUrl = str_replace($docRoot, '', $dir);
+    return rtrim($baseUrl, '/');
+}
+
 function requireLogin(): void {
     if (!isLoggedIn()) {
-        header('Location: /local_service_finder/pages/login.php');
+        header('Location: ' . getBaseUrl() . '/pages/login.php');
         exit;
     }
 }
@@ -17,7 +24,7 @@ function requireLogin(): void {
 function requireRole(string $role): void {
     requireLogin();
     if (($_SESSION['user_role'] ?? '') !== $role) {
-        header('Location: /local_service_finder/pages/login.php');
+        header('Location: ' . getBaseUrl() . '/pages/login.php');
         exit;
     }
 }
@@ -26,9 +33,9 @@ function redirectByRole(): void {
     if (!isLoggedIn()) return;
     $role = $_SESSION['user_role'] ?? '';
     if ($role === 'user') {
-        header('Location: /local_service_finder/pages/user_dashboard.php');
+        header('Location: ' . getBaseUrl() . '/pages/user_dashboard.php');
     } elseif ($role === 'provider') {
-        header('Location: /local_service_finder/pages/provider_dashboard.php');
+        header('Location: ' . getBaseUrl() . '/pages/provider_dashboard.php');
     }
     exit;
 }
