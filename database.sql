@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('user', 'provider') NOT NULL DEFAULT 'user',
+    role ENUM('user', 'provider', 'admin') NOT NULL DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     service_id INT NOT NULL,
     user_id INT NOT NULL,
     provider_id INT NOT NULL,
-    status ENUM('pending', 'accepted', 'completed', 'rejected', 'cancelled') NOT NULL DEFAULT 'pending',
+    booking_status ENUM('pending', 'accepted', 'completed', 'rejected', 'cancelled') NOT NULL DEFAULT 'pending',
+    payment_status ENUM('paid', 'unpaid') NOT NULL DEFAULT 'unpaid',
     booking_date DATE NOT NULL,
     notes TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -63,6 +64,6 @@ CREATE TABLE IF NOT EXISTS reviews (
 -- Indexes for faster queries
 CREATE INDEX idx_bookings_user ON bookings(user_id);
 CREATE INDEX idx_bookings_provider ON bookings(provider_id);
-CREATE INDEX idx_bookings_status ON bookings(status);
+CREATE INDEX idx_bookings_booking_status ON bookings(booking_status);
 CREATE INDEX idx_services_provider ON services(provider_id);
 CREATE INDEX idx_reviews_service ON reviews(service_id);

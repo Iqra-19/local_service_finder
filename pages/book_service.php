@@ -34,13 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setFlash('danger', 'You cannot book your own service.');
         } else {
             // Check for duplicate pending/accepted booking
-            $checkStmt = $pdo->prepare("SELECT id FROM bookings WHERE user_id = ? AND service_id = ? AND booking_date = ? AND status IN ('pending', 'accepted')");
+            $checkStmt = $pdo->prepare("SELECT id FROM bookings WHERE user_id = ? AND service_id = ? AND booking_date = ? AND booking_status IN ('pending', 'accepted')");
             $checkStmt->execute([$_SESSION['user_id'], $serviceId, $bookingDate]);
 
             if ($checkStmt->fetch()) {
                 setFlash('danger', 'You already have an active booking for this service on that date.');
             } else {
-                $insertStmt = $pdo->prepare("INSERT INTO bookings (user_id, provider_id, service_id, booking_date, notes, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+                $insertStmt = $pdo->prepare("INSERT INTO bookings (user_id, provider_id, service_id, booking_date, notes, booking_status) VALUES (?, ?, ?, ?, ?, 'pending')");
                 $insertStmt->execute([
                     $_SESSION['user_id'],
                     $service['provider_id'],
@@ -117,3 +117,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
+

@@ -8,13 +8,13 @@ require_once __DIR__ . '/../includes/sidebar_user.php';
 $userId = $_SESSION['user_id'];
 
 // 1. Fetch Stats
-$statsStmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM bookings WHERE user_id = ? GROUP BY status");
+$statsStmt = $pdo->prepare("SELECT booking_status, COUNT(*) as count FROM bookings WHERE user_id = ? GROUP BY booking_status");
 $statsStmt->execute([$userId]);
 $stats = ['total' => 0, 'confirmed' => 0, 'pending' => 0];
 while ($row = $statsStmt->fetch()) {
     $stats['total'] += $row['count'];
-    if ($row['status'] === 'accepted' || $row['status'] === 'completed') $stats['confirmed'] += $row['count'];
-    if ($row['status'] === 'pending') $stats['pending'] += $row['count'];
+    if ($row['booking_status'] === 'accepted' || $row['booking_status'] === 'completed') $stats['confirmed'] += $row['count'];
+    if ($row['booking_status'] === 'pending') $stats['pending'] += $row['count'];
 }
 
 // 2. Fetch Active/Upcoming Bookings (Pending or Accepted targeting today or future)
@@ -22,7 +22,7 @@ $upcomingStmt = $pdo->prepare("SELECT b.*, s.title AS service_title, s.price, u.
                                FROM bookings b 
                                JOIN services s ON b.service_id = s.id 
                                JOIN users u ON s.provider_id = u.id
-                               WHERE b.user_id = ? AND b.status IN ('pending', 'accepted') AND b.booking_date >= CURDATE()
+                               WHERE b.user_id = ? AND b.booking_status IN ('pending', 'accepted') AND b.booking_date >= CURDATE()
                                ORDER BY b.booking_date ASC LIMIT 3");
 $upcomingStmt->execute([$userId]);
 $upcomingBookings = $upcomingStmt->fetchAll();
@@ -31,7 +31,7 @@ $upcomingBookings = $upcomingStmt->fetchAll();
 $recentStmt = $pdo->prepare("SELECT b.*, s.title AS service_title 
                              FROM bookings b 
                              JOIN services s ON b.service_id = s.id 
-                             WHERE b.user_id = ? AND b.status IN ('completed', 'rejected', 'cancelled')
+                             WHERE b.user_id = ? AND b.booking_status IN ('completed', 'rejected', 'cancelled')
                              ORDER BY b.updated_at DESC LIMIT 4");
 $recentStmt->execute([$userId]);
 $recentBookings = $recentStmt->fetchAll();
@@ -105,7 +105,7 @@ $topServices = $topStmt->fetchAll();
                                 <p class="text-muted small mb-1"><i class="bi bi-person me-1"></i> <?= htmlspecialchars($ub['provider_name']) ?> &nbsp;&bull;&nbsp; <i class="bi bi-calendar me-1"></i> <?= date('M d, Y', strtotime($ub['booking_date'])) ?></p>
                             </div>
                             <div class="text-end">
-                                <span class="badge badge-<?= strtolower($ub['status']) ?> mb-2 fs-6 px-3 py-2 rounded-pill"><?= ucfirst($ub['status']) ?></span>
+                                <span class="badge badge-<?= strtolower($ub['booking_status']) ?> mb-2 fs-6 px-3 py-2 rounded-pill"><?= ucfirst($ub['booking_status']) ?></span>
                                 <div class="fw-bold text-primary">₹<?= number_format($ub['price'], 2) ?></div>
                             </div>
                         </div>
@@ -126,11 +126,11 @@ $topServices = $topStmt->fetchAll();
                     <?php foreach ($recentBookings as $rb): ?>
                         <div class="list-group-item p-3 d-flex justify-content-between align-items-center bg-light">
                             <div>
-                                <span class="badge badge-<?= strtolower($rb['status']) ?> me-2"><?= ucfirst($rb['status']) ?></span>
+                                <span class="badge badge-<?= strtolower($rb['booking_status']) ?> me-2"><?= ucfirst($rb['booking_status']) ?></span>
                                 <span class="fw-bold text-dark"><?= htmlspecialchars($rb['service_title']) ?></span> 
                                 <span class="text-muted small d-block mt-1">on <?= date('M d, Y', strtotime($rb['booking_date'])) ?></span>
                             </div>
-                            <?php if ($rb['status'] === 'completed'): ?>
+                            <?php if ($rb['booking_status'] === 'completed'): ?>
                                 <a href="book_service.php?id=<?= $rb['service_id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-arrow-repeat"></i> Book Again</a>
                             <?php else: ?>
                                 <a href="service_details.php?id=<?= $rb['service_id'] ?>" class="btn btn-sm btn-outline-secondary rounded-pill">View Detail</a>
@@ -174,3 +174,4 @@ $topServices = $topStmt->fetchAll();
 .transition-hover:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; transition: all .2s;}
 </style>
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
+

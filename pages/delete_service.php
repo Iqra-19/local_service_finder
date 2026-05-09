@@ -21,3 +21,4 @@ if ($serviceId) {
 
 header('Location: manage_services.php');
 exit;
+

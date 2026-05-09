@@ -67,3 +67,4 @@ $user = $stmt->fetch();
   </div>
 </div>
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
+

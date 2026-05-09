@@ -28,20 +28,21 @@ if (!isset($allowedTransitions[$action])) {
 $transition = $allowedTransitions[$action];
 
 // Identify booking and ensure the logged in user is the relevant provider
-$stmt = $pdo->prepare("SELECT id, status FROM bookings WHERE id = ? AND provider_id = ?");
+$stmt = $pdo->prepare("SELECT id, booking_status FROM bookings WHERE id = ? AND provider_id = ?");
 $stmt->execute([$bookingId, $_SESSION['user_id']]);
 $booking = $stmt->fetch();
 
 if (!$booking) {
     setFlash('danger', 'Booking not found or access denied.');
-} elseif ($booking['status'] !== $transition['require']) {
+} elseif ($booking['booking_status'] !== $transition['require']) {
     setFlash('danger', "Invalid state transition. Booking must be {$transition['require']} to proceed.");
 } else {
     // Execute state change
-    $updateStmt = $pdo->prepare("UPDATE bookings SET status = ? WHERE id = ?");
+    $updateStmt = $pdo->prepare("UPDATE bookings SET booking_status = ? WHERE id = ?");
     $updateStmt->execute([$transition['target'], $bookingId]);
     setFlash('success', "Booking has been successfully {$transition['target']}.");
 }
 
 header('Location: booking_requests.php');
 exit;
+

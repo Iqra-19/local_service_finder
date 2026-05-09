@@ -79,3 +79,4 @@ if (count($reviews) > 0) {
 </div>
 
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
+

@@ -11,13 +11,13 @@ $providerId = $_SESSION['user_id'];
 $totalServices = 0; $totalBookings = 0; $pendingBookings = 0; $totalEarnings = 0;
 $acceptedCount = 0; $completedCount = 0;
 
-$statsStmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM bookings WHERE provider_id = ? GROUP BY status");
+$statsStmt = $pdo->prepare("SELECT booking_status, COUNT(*) as count FROM bookings WHERE provider_id = ? GROUP BY booking_status");
 $statsStmt->execute([$providerId]);
 while ($row = $statsStmt->fetch()) {
     $totalBookings += $row['count'];
-    if ($row['status'] === 'pending') $pendingBookings = $row['count'];
-    if ($row['status'] === 'accepted') $acceptedCount = $row['count'];
-    if ($row['status'] === 'completed') $completedCount = $row['count'];
+    if ($row['booking_status'] === 'pending') $pendingBookings = $row['count'];
+    if ($row['booking_status'] === 'accepted') $acceptedCount = $row['count'];
+    if ($row['booking_status'] === 'completed') $completedCount = $row['count'];
 }
 
 $svcStmt = $pdo->prepare("SELECT COUNT(*) FROM services WHERE provider_id = ?");
@@ -25,7 +25,7 @@ $svcStmt->execute([$providerId]);
 $totalServices = $svcStmt->fetchColumn();
 
 // Earnings
-$earnStmt = $pdo->prepare("SELECT SUM(s.price) FROM bookings b JOIN services s ON b.service_id = s.id WHERE b.provider_id = ? AND b.status = 'completed'");
+$earnStmt = $pdo->prepare("SELECT SUM(s.price) FROM bookings b JOIN services s ON b.service_id = s.id WHERE b.provider_id = ? AND b.booking_status = 'completed'");
 $earnStmt->execute([$providerId]);
 $totalEarnings = $earnStmt->fetchColumn() ?: 0;
 
@@ -39,7 +39,7 @@ $reqStmt = $pdo->prepare("SELECT b.*, s.title as service_title, u.name as custom
                           FROM bookings b 
                           JOIN services s ON b.service_id = s.id 
                           JOIN users u ON b.user_id = u.id
-                          WHERE b.provider_id = ? AND b.status = 'pending' 
+                          WHERE b.provider_id = ? AND b.booking_status = 'pending' 
                           ORDER BY b.created_at ASC LIMIT 4");
 $reqStmt->execute([$providerId]);
 $pendingRequests = $reqStmt->fetchAll();
@@ -194,3 +194,4 @@ $latestReviews = $revStmt->fetchAll();
 </div>
 
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
+

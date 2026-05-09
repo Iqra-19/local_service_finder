@@ -53,17 +53,17 @@ try {
                     <td><?= htmlspecialchars($b['service_title']) ?></td>
                     <td><?= date('M d, Y', strtotime($b['booking_date'])) ?></td>
                     <td>
-                      <span class="badge badge-<?= strtolower($b['status']) ?> px-2 py-1">
-                        <?= ucfirst($b['status']) ?>
+                      <span class="badge badge-<?= strtolower($b['booking_status']) ?> px-2 py-1">
+                        <?= ucfirst($b['booking_status']) ?>
                       </span>
                     </td>
                     <td class="text-end pe-4">
-                      <?php if ($b['status'] === 'pending'): ?>
+                      <?php if ($b['booking_status'] === 'pending'): ?>
                         <div class="btn-group h-100">
                             <a href="update_booking.php?id=<?= $b['id'] ?>&action=accept" class="btn btn-sm btn-success py-1" onclick="return confirm('Accept this booking?');"><i class="bi bi-check-lg me-1"></i>Accept</a>
                             <a href="update_booking.php?id=<?= $b['id'] ?>&action=reject" class="btn btn-sm btn-danger py-1" onclick="return confirm('Reject this booking?');"><i class="bi bi-x-lg me-1"></i>Reject</a>
                         </div>
-                      <?php elseif ($b['status'] === 'accepted'): ?>
+                      <?php elseif ($b['booking_status'] === 'accepted'): ?>
                         <a href="update_booking.php?id=<?= $b['id'] ?>&action=complete" class="btn btn-sm btn-primary" onclick="return confirm('Mark this service as complete?');"><i class="bi bi-check2-all me-1"></i>Mark Complete</a>
                       <?php else: ?>
                         <span class="text-muted small">—</span>
@@ -80,3 +80,4 @@ try {
   </div>
 </div>
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
+

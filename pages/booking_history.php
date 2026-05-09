@@ -15,7 +15,7 @@ $sql = "SELECT b.*, s.title AS service_title, s.price, s.category, u.name AS pro
 $params = [$_SESSION['user_id']];
 
 if (in_array($statusFilter, ['pending', 'accepted', 'completed', 'rejected', 'cancelled'])) {
-    $sql .= " AND b.status = ?";
+    $sql .= " AND b.booking_status = ?";
     $params[] = $statusFilter;
 }
 
@@ -26,13 +26,13 @@ $stmt->execute($params);
 $bookings = $stmt->fetchAll();
 
 // Stats
-$statsStmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM bookings WHERE user_id = ? GROUP BY status");
+$statsStmt = $pdo->prepare("SELECT booking_status, COUNT(*) as count FROM bookings WHERE user_id = ? GROUP BY booking_status");
 $statsStmt->execute([$_SESSION['user_id']]);
 
 $stats = ['pending' => 0, 'accepted' => 0, 'completed' => 0, 'rejected' => 0, 'cancelled' => 0];
 while ($row = $statsStmt->fetch()) {
-    if (isset($stats[$row['status']])) {
-        $stats[$row['status']] = $row['count'];
+    if (isset($stats[$row['booking_status']])) {
+        $stats[$row['booking_status']] = $row['count'];
     }
 }
 $totalBookings = array_sum($stats);
@@ -136,14 +136,14 @@ $totalBookings = array_sum($stats);
                                         <td><?= date('M d, Y', strtotime($b['booking_date'])) ?></td>
                                         <td class="fw-semibold">₹<?= number_format($b['price'], 2) ?></td>
                                         <td>
-                                            <span class="badge badge-<?= strtolower($b['status']) ?> px-2 py-1">
-                                                <?= ucfirst($b['status']) ?>
+                                            <span class="badge badge-<?= strtolower($b['booking_status']) ?> px-2 py-1">
+                                                <?= ucfirst($b['booking_status']) ?>
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <?php if ($b['status'] === 'pending'): ?>
+                                            <?php if ($b['booking_status'] === 'pending'): ?>
                                                 <a href="cancel_booking.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</a>
-                                            <?php elseif ($b['status'] === 'completed'): ?>
+                                            <?php elseif ($b['booking_status'] === 'completed'): ?>
                                                 <a href="leave_review.php?booking_id=<?= $b['id'] ?>" class="btn btn-sm btn-outline-primary"><i class="bi bi-star me-1"></i>Review</a>
                                             <?php else: ?>
                                                 <span class="text-muted small">—</span>
