@@ -12,13 +12,14 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $location = trim($_POST['location'] ?? '');
 
     if (empty($name) || empty($email)) {
         $error = 'Name and email are required.';
     } else {
         try {
-            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
-            $stmt->execute([$name, $email, $userId]);
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, location = ? WHERE id = ?");
+            $stmt->execute([$name, $email, $location, $userId]);
             $_SESSION['user_name'] = $name;
             $success = 'Profile updated successfully.';
         } catch (PDOException $e) {
@@ -53,6 +54,10 @@ $user = $stmt->fetch();
               <div class="mb-3">
                 <label class="form-label">Email Address</label>
                 <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Location (Service Area)</label>
+                <input type="text" name="location" class="form-control" value="<?= htmlspecialchars($user['location'] ?? '') ?>" placeholder="e.g. London, UK">
               </div>
               <div class="mb-3">
                 <label class="form-label">Role</label>
