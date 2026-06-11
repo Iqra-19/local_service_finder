@@ -11,10 +11,15 @@ $providerId = $_SESSION['user_id'];
 $totalServices = 0; $totalBookings = 0; $pendingBookings = 0; $totalEarnings = 0;
 $acceptedCount = 0; $completedCount = 0;
 
+$statusCounts = ['pending' => 0, 'accepted' => 0, 'completed' => 0, 'rejected' => 0, 'cancelled' => 0];
+
 $statsStmt = $pdo->prepare("SELECT booking_status, COUNT(*) as count FROM bookings WHERE provider_id = ? GROUP BY booking_status");
 $statsStmt->execute([$providerId]);
 while ($row = $statsStmt->fetch()) {
     $totalBookings += $row['count'];
+    if (isset($statusCounts[$row['booking_status']])) {
+        $statusCounts[$row['booking_status']] = intval($row['count']);
+    }
     if ($row['booking_status'] === 'pending') $pendingBookings = $row['count'];
     if ($row['booking_status'] === 'accepted') $acceptedCount = $row['count'];
     if ($row['booking_status'] === 'completed') $completedCount = $row['count'];
@@ -34,6 +39,43 @@ $acceptanceRate = $totalBookings > 0 ? (($acceptedCount + $completedCount) / $to
 // Completion out of accepted
 $completionRate = ($acceptedCount + $completedCount) > 0 ? ($completedCount / ($acceptedCount + $completedCount)) * 100 : 0;
 
+// Fetch Monthly Earnings for the last 6 months
+$trendStmt = $pdo->prepare("
+    SELECT 
+        DATE_FORMAT(b.booking_date, '%M %Y') AS month_label,
+        SUM(s.price) AS monthly_earnings,
+        DATE_FORMAT(b.booking_date, '%Y-%m') as sort_label
+    FROM bookings b
+    JOIN services s ON b.service_id = s.id
+    WHERE b.provider_id = ? AND b.booking_status = 'completed' AND b.booking_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+    GROUP BY month_label, sort_label
+    ORDER BY sort_label ASC
+");
+$trendStmt->execute([$providerId]);
+$rawTrend = $trendStmt->fetchAll();
+
+// Fill missing months with zero values
+$months = [];
+for ($i = 5; $i >= 0; $i--) {
+    $monthKey = date('Y-m', strtotime("-$i months"));
+    $monthName = date('F Y', strtotime("-$i months"));
+    $months[$monthKey] = [
+        'label' => $monthName,
+        'earnings' => 0.0
+    ];
+}
+foreach ($rawTrend as $t) {
+    if (isset($months[$t['sort_label']])) {
+        $months[$t['sort_label']]['earnings'] = floatval($t['monthly_earnings']);
+    }
+}
+$chartLabels = [];
+$chartEarnings = [];
+foreach ($months as $m) {
+    $chartLabels[] = $m['label'];
+    $chartEarnings[] = $m['earnings'];
+}
+
 // 2. Fetch Pending Booking Requests directly
 $reqStmt = $pdo->prepare("SELECT b.*, s.title as service_title, u.name as customer_name, s.price 
                           FROM bookings b 
@@ -51,6 +93,8 @@ $revStmt = $pdo->prepare("SELECT r.*, s.title as service_title, u.name as custom
 $revStmt->execute([$providerId]);
 $latestReviews = $revStmt->fetchAll();
 ?>
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="dashboard-main">
   <?php require_once __DIR__ . '/../includes/topbar.php'; ?>
@@ -88,6 +132,41 @@ $latestReviews = $revStmt->fetchAll();
       </div>
     </div>
 
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+      <!-- Earnings Chart -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 px-4">
+            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-graph-up text-primary me-2"></i>Monthly Earnings Trend</h6>
+            <div class="btn-group btn-group-sm" role="group">
+              <button type="button" class="btn btn-outline-primary active" id="btn-chart-line">Line</button>
+              <button type="button" class="btn btn-outline-primary" id="btn-chart-bar">Bar</button>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <div style="position: relative; height: 280px;">
+              <canvas id="earningsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Status Distribution Chart -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-header bg-white border-bottom py-3 px-4">
+            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart text-success me-2"></i>Booking Status Split</h6>
+          </div>
+          <div class="card-body p-4 d-flex align-items-center justify-content-center">
+            <div style="position: relative; height: 280px; width: 100%;">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="row g-4">
       <!-- Left Column: Pending Actions & Performance -->
       <div class="col-lg-7">
@@ -114,7 +193,6 @@ $latestReviews = $revStmt->fetchAll();
                                     <span class="fw-bold text-success fs-5">₹<?= number_format($req['price'], 2) ?></span>
                                 </div>
                                 <div class="mt-3 bg-light p-2 rounded-3 text-end d-flex justify-content-end gap-2">
-                                    <!-- Direct Integration Action Forms via POST -->
                                     <a href="update_booking.php?id=<?= $req['id'] ?>&action=accept" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm"><i class="bi bi-check-lg me-1"></i> Accept</a>
                                     <a href="update_booking.php?id=<?= $req['id'] ?>&action=reject" class="btn btn-outline-danger btn-sm rounded-pill px-3"><i class="bi bi-x-lg me-1"></i> Reject</a>
                                 </div>
@@ -192,6 +270,133 @@ $latestReviews = $revStmt->fetchAll();
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const earningsLabels = <?= json_encode($chartLabels) ?>;
+    const earningsData = <?= json_encode($chartEarnings) ?>;
+    const statusLabels = ['Pending', 'Accepted', 'Completed', 'Rejected', 'Cancelled'];
+    const statusData = [
+        <?= $statusCounts['pending'] ?>,
+        <?= $statusCounts['accepted'] ?>,
+        <?= $statusCounts['completed'] ?>,
+        <?= $statusCounts['rejected'] ?>,
+        <?= $statusCounts['cancelled'] ?>
+    ];
+
+    // 1. Earnings Trend Chart (Line / Bar)
+    const ctxEarnings = document.getElementById('earningsChart').getContext('2d');
+    let earningsChart = new Chart(ctxEarnings, {
+        type: 'line',
+        data: {
+            labels: earningsLabels,
+            datasets: [{
+                label: 'Monthly Earnings (₹)',
+                data: earningsData,
+                borderColor: '#1a73e8',
+                backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return '₹' + value.toLocaleString(); }
+                    }
+                }
+            }
+        }
+    });
+
+    // Chart Type Toggles
+    document.getElementById('btn-chart-line').addEventListener('click', function() {
+        this.classList.add('active');
+        document.getElementById('btn-chart-bar').classList.remove('active');
+        updateEarningsChartType('line');
+    });
+
+    document.getElementById('btn-chart-bar').addEventListener('click', function() {
+        this.classList.add('active');
+        document.getElementById('btn-chart-line').classList.remove('active');
+        updateEarningsChartType('bar');
+    });
+
+    function updateEarningsChartType(type) {
+        earningsChart.destroy();
+        earningsChart = new Chart(ctxEarnings, {
+            type: type,
+            data: {
+                labels: earningsLabels,
+                datasets: [{
+                    label: 'Monthly Earnings (₹)',
+                    data: earningsData,
+                    borderColor: '#1a73e8',
+                    backgroundColor: type === 'bar' ? 'rgba(26, 115, 232, 0.8)' : 'rgba(26, 115, 232, 0.1)',
+                    borderWidth: type === 'bar' ? 0 : 3,
+                    fill: type !== 'bar',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return '₹' + value.toLocaleString(); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Booking Status Distribution Chart (Doughnut)
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: [
+                    '#ffc107', // Warning (Pending)
+                    '#0d6efd', // Primary (Accepted)
+                    '#198754', // Success (Completed)
+                    '#dc3545', // Danger (Rejected)
+                    '#6c757d'  // Secondary (Cancelled)
+                ],
+                borderWidth: 2,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 12, font: { size: 11 } }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
 
