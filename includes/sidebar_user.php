@@ -27,6 +27,12 @@ $current = basename($_SERVER['PHP_SELF']);
         <i class="bi bi-clock-history"></i> <span>Booking History</span>
       </a>
     </li>
+    <li>
+      <a href="chat.php" class="<?= $current === 'chat.php' ? 'active' : '' ?>">
+        <i class="bi bi-chat-left-text"></i> <span>Messages</span>
+        <span class="badge bg-danger rounded-pill ms-auto d-none" id="unread-chat-count"></span>
+      </a>
+    </li>
   </ul>
   <div class="sidebar-footer">
     <a href="../pages/logout.php" class="btn btn-outline-danger btn-sm w-100">

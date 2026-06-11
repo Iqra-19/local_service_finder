@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role ENUM('user', 'provider', 'admin') NOT NULL DEFAULT 'user',
     location VARCHAR(100) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    latitude DECIMAL(10, 8) DEFAULT NULL,
+    longitude DECIMAL(11, 8) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_users_coords (latitude, longitude)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Services table
@@ -24,11 +27,14 @@ CREATE TABLE IF NOT EXISTS services (
     description TEXT,
     price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     location VARCHAR(100) DEFAULT NULL,
+    latitude DECIMAL(10, 8) DEFAULT NULL,
+    longitude DECIMAL(11, 8) DEFAULT NULL,
     image VARCHAR(255) DEFAULT 'default_service.jpg',
     status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_services_coords (latitude, longitude)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bookings table
@@ -62,6 +68,20 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Messages table
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_messages_sender_receiver (sender_id, receiver_id),
+    INDEX idx_messages_receiver_read (receiver_id, is_read)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Indexes for faster queries

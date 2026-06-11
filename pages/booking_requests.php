@@ -58,6 +58,7 @@ try {
                       </span>
                     </td>
                     <td class="text-end pe-4">
+                      <a href="chat.php?user_id=<?= $b['user_id'] ?>" class="btn btn-sm btn-outline-secondary me-1" title="Chat with Customer"><i class="bi bi-chat-left-text"></i> Chat</a>
                       <?php if ($b['booking_status'] === 'pending'): ?>
                         <div class="btn-group h-100">
                             <a href="update_booking.php?id=<?= $b['id'] ?>&action=accept" class="btn btn-sm btn-success py-1" onclick="return confirm('Accept this booking?');"><i class="bi bi-check-lg me-1"></i>Accept</a>
@@ -65,8 +66,6 @@ try {
                         </div>
                       <?php elseif ($b['booking_status'] === 'accepted'): ?>
                         <a href="update_booking.php?id=<?= $b['id'] ?>&action=complete" class="btn btn-sm btn-primary" onclick="return confirm('Mark this service as complete?');"><i class="bi bi-check2-all me-1"></i>Mark Complete</a>
-                      <?php else: ?>
-                        <span class="text-muted small">—</span>
                       <?php endif; ?>
                     </td>
                   </tr>

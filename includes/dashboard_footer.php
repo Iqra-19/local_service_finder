@@ -1,0 +1,35 @@
+</div><!-- Close .dashboard-wrapper (opened in dashboard_header.php) -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Global Chat Unread Badges Polling Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const unreadBadge = document.getElementById('unread-chat-count');
+    if (!unreadBadge) return;
+
+    function fetchUnreadCount() {
+        // Find base path dynamically (checks if page is in pages/ directory or root)
+        const isRoot = window.location.pathname.indexOf('/pages/') === -1;
+        const handlerUrl = isRoot ? 'pages/chat_handler.php?action=unread_total' : 'chat_handler.php?action=unread_total';
+
+        fetch(handlerUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.status === 'success' && data.unread_count > 0) {
+                    unreadBadge.innerText = data.unread_count;
+                    unreadBadge.classList.remove('d-none');
+                } else {
+                    unreadBadge.classList.add('d-none');
+                }
+            })
+            .catch(err => console.error('Unread count fetch error:', err));
+    }
+
+    // Run immediately and then poll every 15 seconds
+    fetchUnreadCount();
+    setInterval(fetchUnreadCount, 15000);
+});
+</script>
+</body>
+</html>
