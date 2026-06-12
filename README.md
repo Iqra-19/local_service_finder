@@ -1,94 +1,109 @@
 # Local Service Finder 🛠️
 
-A modern, robust Local Service Marketplace built with **Core PHP**, **MySQL**, and **Bootstrap 5**. This platform seamlessly connects local service providers with customers looking for various services (plumbing, cleaning, IT support, etc.), providing end-to-end workflows from booking creation to service review.
-
-![Glassmorphism UI](https://img.shields.io/badge/UI-Glassmorphism-blue?style=flat-square) ![PHP](https://img.shields.io/badge/PHP-Core-777BB4?style=flat-square&logo=php) ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=flat-square&logo=mysql) ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap)
+A modern, robust Local Service Marketplace built with **Core PHP**, **MySQL**, and **Bootstrap 5**. This platform connects local service providers with customers, managing the entire lifecycle of booking requests, live chat communication, geolocation-based searches, and service reviews.
 
 ---
 
-## ✨ Key Features
+## 🚀 Recruiter Quick Start (Demo Sandbox)
+
+To make evaluating this application as frictionless as possible, the login screen is pre-configured with a **HERO Provider** account that simulates a mature, 3-month-old service business:
+
+- **Demo URL:** `http://localhost/local_service_finder/pages/login.php`
+- **Prefilled Account Credentials:**
+  - **Email:** `volt.repair@services.com`
+  - **Password:** `Password123`
+- **Manual Setup Guide:** To populate the complete interconnected database (reviews, chats, rejections, pending actions, and maps), follow the step-by-step checklist in [demo_creation_guide.md](file:///C:/Users/iqrat/.gemini/antigravity-ide/brain/e5f354b0-4024-4bd5-9057-243e5fdd3863/demo_creation_guide.md).
+
+---
+
+## ✨ Core Features
 
 ### 👤 Customer Features
-* **Live Service Browsing:** Instantly search and filter through available services using asynchronous AJAX — without reloading the page.
-* **Service Booking system:** Book services smoothly with custom notes.
-* **Booking Management:** View booking history, update pending bookings, and cancel requests directly from the user dashboard.
-* **Review & Rating System:** Leave detailed 1-5 star reviews on completed services to help the community.
+
+- **Geographical Search & Filters:** Browse services nearby using Leaflet maps. Customers can filter by keyword, category, or distance radius, with results sorted by price, rating, or proximity.
+- **Interactive Map Integration:** Real-time distance calculations and map markers showing nearby providers. Hovering over service listings highlights the corresponding map pin.
+- **Seamless Service Booking:** Request appointments for future dates with customized requirements and notes.
+- **P2P Chat Interface:** Real-time messaging with providers to negotiate pricing, finalize arrival times, or coordinate details.
+- **Review & Rating Engine:** Rate completed services from 1 to 5 stars with comment logs to build community trust.
 
 ### 💼 Provider Features
-* **Service Management Engine:** Fully featured CRUD functionality to add, edit, and delete their service offerings.
-* **Request Handling:** Manage incoming bookings (Accept/Reject) visually from a tailored Provider Dashboard.
-* **Performance Dashboard:** Monitor active services, track earnings, and view cumulative community ratings and reviews.
 
-### 🛡️ System & Architecture
-* **Role-Based Authentication:** Distinct and heavily guarded routing separating `user` and `provider` access.
-* **Advanced UI & Glassmorphism:** Features a highly modern auth UI demonstrating frosted glass aesthetics built with vanilla CSS.
-* **Automated Flash Messaging:** User actions return contextual feedback across pages using a custom session-based flash messaging utility.
-* **Secure Database Layer:** Complete use of PHP PDO (prepared statements) to prevent SQL Injection, alongside relational DB rules enforcing cascading integrity.
+- **Interactive Business Dashboard:** Monitor active services, track cumulative earnings, check operational metrics (Acceptance Rate and Completion Rate), and view monthly earnings trend lines.
+- **Service Management (CRUD):** Add, edit, or disable services, set customized pricing, upload showcase photos, and pin precise service locations on the map.
+- **Real-time Queue Management:** Accept or reject incoming booking requests with automatic customer status updates.
+- **Dynamic Notifications:** Red unread message badges alert the provider of incoming chat messages.
+
+---
+
+## 🔒 Security & Architecture
+
+This application was engineered with a focus on web application security, clean database design, and smooth user interactions:
+
+1. **Prepared SQL Statements (PDO):** Complete defense against SQL Injection (SQLi) vulnerabilities across all read and write queries.
+2. **Secure Password Hashing:** User passwords are encrypted using `bcrypt` (default Blowfish algorithm with custom safety parameters) at registration.
+3. **Session Integrity & Protection:** Defensive session validations, login rate-limiting, and automatic lockout mechanics to prevent brute-force attacks.
+4. **Role-Based Access Control (RBAC):** Strict separation of customer (`user`) and service provider (`provider`) routes. Attempting to access dashboard files without appropriate credentials triggers an instant redirection.
+5. **Cascading Relational Integrity:** Built-in MySQL foreign keys ensure that deletions (e.g., deleting a service or user) cascade gracefully without leaving dangling or orphan rows.
+6. **Asynchronous UI (Fetch AJAX):** Search filtering, sorting, map pins, and chat messages update dynamically without page reloads, providing a desktop-app-like experience.
 
 ---
 
 ## 💻 Tech Stack
 
-* **Backend:** PHP 8.x (Core)
-* **Database:** MySQL
-* **Frontend Design:** HTML5, CSS3, Bootstrap 5.3
-* **Interactivity:** Vanilla JavaScript, AJAX (fetch API)
+- **Backend Engine:** Core PHP 8.x (Object-Oriented Database connection via PDO)
+- **Database Layer:** MySQL (Structured Relational Schema)
+- **Frontend Design:** HTML5, Modern CSS3, Bootstrap 5.3 (featuring clean glassmorphism accents)
+- **Interactivity:** Vanilla JavaScript (ES6+), Fetch API (asynchronous communication)
+- **Map Engine:** Leaflet.js & OpenStreetMap API
 
 ---
 
-## 🚀 Installation & Local Setup
+## 🛠️ Local Installation Setup
 
-Follow these steps to run the project locally via XAMPP/MAMP/WAMP.
+Follow these steps to run the project locally via standard local environments (e.g. XAMPP, MAMP, WAMP).
 
-### 1. Prerequisites
-- A local web server stack like [XAMPP](https://www.apachefriends.org/index.html) or [MAMP](https://www.mamp.info/).
-- PHP 8.0+ and MySQL.
+### 1. Project Directory Placement
 
-### 2. Clone the Repository
-Inside your local `htdocs` (XAMPP) or `www` (WAMP) folder, clone the directory:
+Clone or move the repository into your local server's document root (e.g., `htdocs` for XAMPP, `www` for WAMP):
+
 ```bash
+cd xamp/htdocs
 git clone <repository_url> local_service_finder
-cd local_service_finder
 ```
 
-### 3. Database Setup
-1. Open **phpMyAdmin** (usually `http://localhost/phpmyadmin`).
-2. Create a new database named `local_service_finder`.
-3. Import the exact schema and tables by uploading the `database.sql` file located in the root of the project.
+### 2. Import Database Schema
 
-### 4. Configuration Check
-By default, the database connection assumes a default XAMPP configuration:
-* **Host:** `localhost`
-* **Dataset Name:** `local_service_finder`
-* **Username:** `root`
-* **Password:** *(empty)*
+1. Launch **phpMyAdmin** (`http://localhost/phpmyadmin`).
+2. Create a new database named `local_service_finder` with collation `utf8mb4_general_ci`.
+3. Import the `database.sql` file located in the root of the project.
 
-If your MySQL credentials differ, update them directly in `config/db.php`.
+### 3. Connection Configuration
 
-### 5. Launch the Application
-Open your web browser and navigate to:
+The application connects using the credentials defined in `config/db.php`. By default:
+
+- **Host:** `localhost`
+- **Database:** `local_service_finder`
+- **Username:** `root`
+- **Password:** _(empty)_
+
+Update `config/db.php` if your local MySQL settings differ.
+
+### 4. Running the Application
+
+Point your browser to:
+
 ```text
 http://localhost/local_service_finder
 ```
 
 ---
 
-## 🗄️ Database Architecture
+## 🗄️ Database Schema Relationships
 
-The system operates across 4 tightly coupled tables mapping relational interactions:
-1. `users` — Tracks accounts, passwords, and user `role` (user/provider).
-2. `services` — Belongs to a provider; holds classification, description, and pricing data.
-3. `bookings` — Bridge table managing states (`pending`, `accepted`, `completed`, `cancelled`) between a user, provider, and service.
-4. `reviews` — Links feedback to specific completed bookings.
+The database is built on 5 relational tables:
 
----
-
-## 🔮 Future Enhancements Roadmap
-- [ ] **Email Notifications:** Integrate PHPMailer to send alerts on booking status changes.
-- [ ] **Payment Gateway:** Implement Stripe/PayPal for upfront booking deposits.
-- [ ] **Interactive Analytics:** Use Chart.js on the Provider Dashboard to visualize monthly booking trends.
-- [ ] **Admin Panel:** Introduce a 3rd `admin` role for total platform moderation (dispute handling, user bans).
-
----
-
-*Architected and developed with modern Core PHP best-practices in mind.*
+- `users` — Stores account details, coordinates (latitude/longitude), and role flags.
+- `services` — Maps service titles, categories, pricing, descriptions, images, and locations.
+- `bookings` — Bridge table connecting users, providers, and services under 5 status states (`pending`, `accepted`, `completed`, `rejected`, `cancelled`).
+- `reviews` — Logs rating scores and customer text feedback linked to completed bookings.
+- `messages` — Handles peer-to-peer chat logs with a read status indicator.
