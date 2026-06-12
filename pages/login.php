@@ -11,6 +11,7 @@ if (!isset($_SESSION['login_attempts'])) {
 
 $error = '';
 $lockoutDuration = 15; // minutes
+$email = $_SERVER['REQUEST_METHOD'] !== 'POST' ? 'volt.repair@services.com' : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -99,7 +100,7 @@ include __DIR__ . '/../includes/auth_header.php';
                 
                 <div class="form-floating pe-5 position-relative mb-2">
                     <input type="password" name="password" id="password" class="form-control rounded-3" 
-                           placeholder="Password" required>
+                           value="<?= $_SERVER['REQUEST_METHOD'] !== 'POST' ? 'Password123' : '' ?>" placeholder="Password" required>
                     <label for="password"><i class="bi bi-key me-1"></i>Password</label>
                     <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y text-muted border-0 shadow-none px-3" id="togglePassword">
                         <i class="bi bi-eye-fill fs-5" id="toggleIcon"></i>
