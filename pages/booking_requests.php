@@ -58,7 +58,7 @@ try {
                       </span>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="chat.php?user_id=<?= $b['user_id'] ?>" class="btn btn-sm btn-outline-secondary me-1" title="Chat with Customer"><i class="bi bi-chat-left-text"></i> Chat</a>
+                      <a href="support_messages.php?user_id=<?= $b['user_id'] ?>" class="btn btn-sm btn-outline-secondary me-1" title="Chat with Customer"><i class="bi bi-chat-left-text"></i> Chat</a>
                       <?php if ($b['booking_status'] === 'pending'): ?>
                         <div class="btn-group h-100">
                             <a href="update_booking.php?id=<?= $b['id'] ?>&action=accept" class="btn btn-sm btn-success py-1" onclick="return confirm('Accept this booking?');"><i class="bi bi-check-lg me-1"></i>Accept</a>

@@ -28,7 +28,7 @@ $current = basename($_SERVER['PHP_SELF']);
       </a>
     </li>
     <li>
-      <a href="chat.php" class="<?= $current === 'chat.php' ? 'active' : '' ?>">
+      <a href="support_messages.php" class="<?= $current === 'support_messages.php' ? 'active' : '' ?>">
         <i class="bi bi-chat-left-text"></i> <span>Messages</span>
         <span class="badge bg-danger rounded-pill ms-auto d-none" id="unread-chat-count"></span>
       </a>

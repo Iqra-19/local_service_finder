@@ -141,7 +141,7 @@ $totalBookings = array_sum($stats);
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <a href="chat.php?user_id=<?= $b['provider_id'] ?>" class="btn btn-sm btn-outline-secondary me-1" title="Chat with Provider"><i class="bi bi-chat-left-text"></i> Chat</a>
+                                            <a href="support_messages.php?user_id=<?= $b['provider_id'] ?>" class="btn btn-sm btn-outline-secondary me-1" title="Chat with Provider"><i class="bi bi-chat-left-text"></i> Chat</a>
                                             <?php if ($b['booking_status'] === 'pending'): ?>
                                                 <a href="cancel_booking.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</a>
                                             <?php elseif ($b['booking_status'] === 'completed'): ?>

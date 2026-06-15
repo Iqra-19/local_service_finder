@@ -1,8 +1,8 @@
 -- LOCAL SERVICE FINDER DATABASE
 -- Database: local_service_finder
 
-CREATE DATABASE IF NOT EXISTS local_service_finder;
-USE local_service_finder;
+-- CREATE DATABASE IF NOT EXISTS local_service_finder;
+-- USE local_service_finder;
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (

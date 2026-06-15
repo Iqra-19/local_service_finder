@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function fetchUnreadCount() {
         // Find base path dynamically (checks if page is in pages/ directory or root)
         const isRoot = window.location.pathname.indexOf('/pages/') === -1;
-        const handlerUrl = isRoot ? 'pages/chat_handler.php?action=unread_total' : 'chat_handler.php?action=unread_total';
+        const handlerUrl = isRoot ? 'pages/message_handler.php?action=unread_total' : 'message_handler.php?action=unread_total';
 
         fetch(handlerUrl)
             .then(response => response.json())
@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => console.error('Unread count fetch error:', err));
     }
 
-    // Run immediately and then poll every 15 seconds
+    // Run immediately and then poll every 30 seconds (optimized for shared hosting)
     fetchUnreadCount();
-    setInterval(fetchUnreadCount, 15000);
+    setInterval(fetchUnreadCount, 30000);
 });
 </script>
 </body>

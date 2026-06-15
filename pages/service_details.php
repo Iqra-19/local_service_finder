@@ -115,7 +115,7 @@ $reviews = $revStmt->fetchAll();
                         <a href="book_service.php?id=<?= $service['id'] ?>" class="btn btn-primary btn-lg w-100 fw-medium shadow-sm mb-3">
                             <i class="bi bi-calendar-check me-2"></i> Book This Service
                         </a>
-                        <a href="chat.php?user_id=<?= $service['provider_id'] ?>" class="btn btn-outline-primary btn-lg w-100 fw-medium">
+                        <a href="support_messages.php?user_id=<?= $service['provider_id'] ?>" class="btn btn-outline-primary btn-lg w-100 fw-medium">
                             <i class="bi bi-chat-left-text me-2"></i> Message Provider
                         </a>
                     </div>
