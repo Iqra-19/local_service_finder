@@ -1,6 +1,6 @@
 # Local Service Finder 🛠️
 
-A modern, robust Local Service Marketplace built with **Core PHP**, **MySQL**, and **Bootstrap 5**. This platform connects local service providers with customers, managing the entire lifecycle of booking requests, live chat communication, geolocation-based searches, and service reviews.
+A modern, robust Local Service Marketplace built with **Core PHP**, **MySQL**, and **Bootstrap 5**. This platform connects local service providers with customers, managing the entire lifecycle of booking requests, peer-to-peer messaging, geolocation-based searches, and service reviews.
 
 ---
 
@@ -12,7 +12,7 @@ To make evaluating this application as frictionless as possible, the login scree
 - **Prefilled Account Credentials:**
   - **Email:** `volt.repair@services.com`
   - **Password:** `Password123`
-- **Manual Setup Guide:** To populate the complete interconnected database (reviews, chats, rejections, pending actions, and maps), follow the step-by-step checklist in [demo_creation_guide.md](file:///C:/Users/iqrat/.gemini/antigravity-ide/brain/e5f354b0-4024-4bd5-9057-243e5fdd3863/demo_creation_guide.md).
+- **Manual Setup Guide:** To populate the complete interconnected database (reviews, messages, rejections, pending actions, and maps), follow the step-by-step checklist in [demo_creation_guide.md](file:///C:/Users/iqrat/.gemini/antigravity-ide/brain/e5f354b0-4024-4bd5-9057-243e5fdd3863/demo_creation_guide.md).
 
 ---
 
@@ -23,7 +23,7 @@ To make evaluating this application as frictionless as possible, the login scree
 - **Geographical Search & Filters:** Browse services nearby using Leaflet maps. Customers can filter by keyword, category, or distance radius, with results sorted by price, rating, or proximity.
 - **Interactive Map Integration:** Real-time distance calculations and map markers showing nearby providers. Hovering over service listings highlights the corresponding map pin.
 - **Seamless Service Booking:** Request appointments for future dates with customized requirements and notes.
-- **P2P Chat Interface:** Real-time messaging with providers to negotiate pricing, finalize arrival times, or coordinate details.
+- **P2P Messaging Interface:** Asynchronous peer-to-peer messaging with providers to negotiate pricing, finalize arrival times, or coordinate details. Designed to run efficiently on shared hosting (like InfinityFree) using resource-friendly adaptive polling.
 - **Review & Rating Engine:** Rate completed services from 1 to 5 stars with comment logs to build community trust.
 
 ### 💼 Provider Features
@@ -31,7 +31,7 @@ To make evaluating this application as frictionless as possible, the login scree
 - **Interactive Business Dashboard:** Monitor active services, track cumulative earnings, check operational metrics (Acceptance Rate and Completion Rate), and view monthly earnings trend lines.
 - **Service Management (CRUD):** Add, edit, or disable services, set customized pricing, upload showcase photos, and pin precise service locations on the map.
 - **Real-time Queue Management:** Accept or reject incoming booking requests with automatic customer status updates.
-- **Dynamic Notifications:** Red unread message badges alert the provider of incoming chat messages.
+- **Dynamic Notifications:** Red unread message badges alert the provider of incoming messages.
 
 ---
 
@@ -44,7 +44,7 @@ This application was engineered with a focus on web application security, clean 
 3. **Session Integrity & Protection:** Defensive session validations, login rate-limiting, and automatic lockout mechanics to prevent brute-force attacks.
 4. **Role-Based Access Control (RBAC):** Strict separation of customer (`user`) and service provider (`provider`) routes. Attempting to access dashboard files without appropriate credentials triggers an instant redirection.
 5. **Cascading Relational Integrity:** Built-in MySQL foreign keys ensure that deletions (e.g., deleting a service or user) cascade gracefully without leaving dangling or orphan rows.
-6. **Asynchronous UI (Fetch AJAX):** Search filtering, sorting, map pins, and chat messages update dynamically without page reloads, providing a desktop-app-like experience.
+6. **Asynchronous UI (Fetch AJAX):** Search filtering, sorting, map pins, and messages update dynamically without page reloads, utilizing an adaptive backoff polling algorithm to conserve hosting resources.
 
 ---
 
@@ -106,4 +106,4 @@ The database is built on 5 relational tables:
 - `services` — Maps service titles, categories, pricing, descriptions, images, and locations.
 - `bookings` — Bridge table connecting users, providers, and services under 5 status states (`pending`, `accepted`, `completed`, `rejected`, `cancelled`).
 - `reviews` — Logs rating scores and customer text feedback linked to completed bookings.
-- `messages` — Handles peer-to-peer chat logs with a read status indicator.
+- `messages` — Handles peer-to-peer message logs with a read status indicator.
