@@ -124,7 +124,8 @@ $totalBookings = array_sum($stats);
                                     <th>Provider</th>
                                     <th>Date</th>
                                     <th>Price</th>
-                                    <th>Status</th>
+                                    <th>Booking Status</th>
+                                    <th>Payment</th>
                                     <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
@@ -140,9 +141,21 @@ $totalBookings = array_sum($stats);
                                                 <?= ucfirst($b['booking_status']) ?>
                                             </span>
                                         </td>
+                                        <td>
+                                            <?php if ($b['payment_status'] === 'paid'): ?>
+                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                                            <?php elseif ($b['booking_status'] === 'accepted'): ?>
+                                                <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle me-1"></i>Payment Due</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted border">Unpaid</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-end pe-4">
                                             <a href="support_messages.php?user_id=<?= $b['provider_id'] ?>" class="btn btn-sm btn-outline-secondary me-1" title="Chat with Provider"><i class="bi bi-chat-left-text"></i> Chat</a>
-                                            <?php if ($b['booking_status'] === 'pending'): ?>
+                                            
+                                            <?php if ($b['booking_status'] === 'accepted' && $b['payment_status'] !== 'paid'): ?>
+                                                <a href="booking_summary.php?booking_id=<?= $b['id'] ?>" class="btn btn-sm btn-success fw-bold me-1"><i class="bi bi-credit-card me-1"></i>Pay Now</a>
+                                            <?php elseif ($b['booking_status'] === 'pending'): ?>
                                                 <a href="cancel_booking.php?id=<?= $b['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</a>
                                             <?php elseif ($b['booking_status'] === 'completed'): ?>
                                                 <a href="leave_review.php?booking_id=<?= $b['id'] ?>" class="btn btn-sm btn-outline-primary"><i class="bi bi-star me-1"></i>Review</a>

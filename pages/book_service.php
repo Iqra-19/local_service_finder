@@ -48,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $bookingDate,
                     htmlspecialchars($notes, ENT_QUOTES, 'UTF-8')
                 ]);
-                setFlash('success', 'Booking request submitted successfully!');
+                $bookingId = $pdo->lastInsertId();
+                setFlash('success', 'Booking request submitted successfully! Payment option will be enabled once the service provider accepts your request.');
                 header('Location: booking_history.php');
                 exit;
             }

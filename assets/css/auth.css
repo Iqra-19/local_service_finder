@@ -149,3 +149,30 @@ body.auth-body::after {
 #strengthMeter {
     transition: width 0.4s ease, background-color 0.4s ease;
 }
+
+/* Auth Divider for Social Login */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin: 1.5rem 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+.auth-divider:not(:empty)::before {
+    margin-right: .75em;
+}
+.auth-divider:not(:empty)::after {
+    margin-left: .75em;
+}
+.google-btn-container {
+    display: flex;
+    justify-content: center;
+}
+

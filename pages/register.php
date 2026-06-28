@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/google_config.php';
 
 if (isLoggedIn()) redirectByRole();
 
@@ -119,6 +120,25 @@ include __DIR__ . '/../includes/auth_header.php';
                 </button>
             </form>
 
+            <div class="auth-divider">OR</div>
+
+            <div class="google-btn-container mb-3">
+                <div id="g_id_onload"
+                     data-client_id="<?= htmlspecialchars(GOOGLE_CLIENT_ID) ?>"
+                     data-callback="handleGoogleSignUp"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="outline"
+                     data-text="signup_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left"
+                     data-width="320">
+                </div>
+            </div>
+
             <div class="text-center mt-3 border-top border-dark border-opacity-10 pt-4">
                 <p class="text-muted small mb-0">
                     Already possess an account? <br>
@@ -130,6 +150,27 @@ include __DIR__ . '/../includes/auth_header.php';
 </div>
 
 <script>
+function handleGoogleSignUp(response) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= getBaseUrl() ?>/pages/google_auth.php';
+    
+    const credInput = document.createElement('input');
+    credInput.type = 'hidden';
+    credInput.name = 'credential';
+    credInput.value = response.credential;
+    form.appendChild(credInput);
+    
+    const roleInput = document.createElement('input');
+    roleInput.type = 'hidden';
+    roleInput.name = 'role';
+    roleInput.value = document.getElementById('role') ? document.getElementById('role').value : 'user';
+    form.appendChild(roleInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Password Strength
     const passInput = document.getElementById('password');

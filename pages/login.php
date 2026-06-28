@@ -1,8 +1,10 @@
 <?php
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/google_config.php';
 
 if (isLoggedIn()) redirectByRole();
+
 
 if (!isset($_SESSION['login_attempts'])) {
     $_SESSION['login_attempts'] = 0;
@@ -109,7 +111,7 @@ include __DIR__ . '/../includes/auth_header.php';
                 </div>
 
                 <div class="d-flex justify-content-end mb-4">
-                    <a href="#" class="small">Forgot Password?</a>
+                    <a href="forgot_password.php" class="small">Forgot Password?</a>
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn btn-glass btn-lg w-100 rounded-3 mb-3 position-relative">
@@ -117,6 +119,25 @@ include __DIR__ . '/../includes/auth_header.php';
                     <span id="submitText"><i class="bi bi-box-arrow-in-right me-1"></i> Secure Login</span>
                 </button>
             </form>
+
+            <div class="auth-divider">OR</div>
+
+            <div class="google-btn-container mb-3">
+                <div id="g_id_onload"
+                     data-client_id="<?= htmlspecialchars(GOOGLE_CLIENT_ID) ?>"
+                     data-login_uri="<?= getBaseUrl() ?>/pages/google_auth.php"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="outline"
+                     data-text="sign_in_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left"
+                     data-width="320">
+                </div>
+            </div>
 
             <div class="text-center mt-4 border-top border-dark border-opacity-10 pt-4">
                 <p class="text-muted small mb-0">

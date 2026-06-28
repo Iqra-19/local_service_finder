@@ -28,6 +28,11 @@ $current = basename($_SERVER['PHP_SELF']);
       </a>
     </li>
     <li>
+      <a href="provider_earnings.php" class="<?= $current === 'provider_earnings.php' ? 'active' : '' ?>">
+        <i class="bi bi-cash-stack"></i> <span>Earnings & Payouts</span>
+      </a>
+    </li>
+    <li>
       <a href="provider_reviews.php" class="<?= $current === 'provider_reviews.php' ? 'active' : '' ?>">
         <i class="bi bi-star"></i> <span>My Reviews</span>
       </a>
