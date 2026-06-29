@@ -29,6 +29,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Run immediately and then poll every 30 seconds (optimized for shared hosting)
     fetchUnreadCount();
     setInterval(fetchUnreadCount, 30000);
+
+    // Global Form Submit Spinner & Anti-Double Submission Protection
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            if (form.checkValidity ? form.checkValidity() : true) {
+                const btn = form.querySelector('button[type="submit"]');
+                if (btn && !btn.classList.contains('no-spinner')) {
+                    setTimeout(() => {
+                        btn.disabled = true;
+                        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...`;
+                    }, 50);
+                }
+            }
+        });
+    });
 });
 </script>
 </body>

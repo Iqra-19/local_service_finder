@@ -16,47 +16,51 @@ $lockoutDuration = 15; // minutes
 $email = $_SERVER['REQUEST_METHOD'] !== 'POST' ? 'volt.repair@services.com' : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    if ($_SESSION['login_lockout'] > 0 && $_SESSION['login_lockout'] < time()) {
-        $_SESSION['login_attempts'] = 0;
-        $_SESSION['login_lockout'] = 0;
-    }
-
-    if ($_SESSION['login_lockout'] > time()) {
-        $remaining = ceil(($_SESSION['login_lockout'] - time()) / 60);
-        $error = "Too many failed attempts. Try again in $remaining minute(s).";
+    if (!verifyCsrfToken()) {
+        $error = 'Invalid CSRF security token. Please refresh and try again.';
     } else {
-        if (!$email || !$password) {
-            $error = 'Both email and password are required.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Please enter a valid email address.';
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if ($_SESSION['login_lockout'] > 0 && $_SESSION['login_lockout'] < time()) {
+            $_SESSION['login_attempts'] = 0;
+            $_SESSION['login_lockout'] = 0;
+        }
+
+        if ($_SESSION['login_lockout'] > time()) {
+            $remaining = ceil(($_SESSION['login_lockout'] - time()) / 60);
+            $error = "Too many failed attempts. Try again in $remaining minute(s).";
         } else {
-            $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
-            $stmt->execute([$email]);
-            $user = $stmt->fetch();
-
-            if ($user && password_verify($password, $user['password'])) {
-                session_regenerate_id(true);
-
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_role'] = $user['role'];
-
-                $_SESSION['login_attempts'] = 0;
-                $_SESSION['login_lockout'] = 0;
-
-                redirectByRole();
+            if (!$email || !$password) {
+                $error = 'Both email and password are required.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = 'Please enter a valid email address.';
             } else {
-                $_SESSION['login_attempts']++;
-                if ($_SESSION['login_attempts'] >= 5) {
-                    $_SESSION['login_lockout'] = time() + ($lockoutDuration * 60);
-                    $error = "Account locked locally for $lockoutDuration minutes.";
+                $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
+                $stmt->execute([$email]);
+                $user = $stmt->fetch();
+
+                if ($user && password_verify($password, $user['password'])) {
+                    session_regenerate_id(true);
+
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['user_role'] = $user['role'];
+
+                    $_SESSION['login_attempts'] = 0;
+                    $_SESSION['login_lockout'] = 0;
+
+                    redirectByRole();
                 } else {
-                    $attemptsLeft = 5 - $_SESSION['login_attempts'];
-                    $error = "Invalid credentials. ($attemptsLeft attempts remaining)";
+                    $_SESSION['login_attempts']++;
+                    if ($_SESSION['login_attempts'] >= 5) {
+                        $_SESSION['login_lockout'] = time() + ($lockoutDuration * 60);
+                        $error = "Account locked locally for $lockoutDuration minutes.";
+                    } else {
+                        $attemptsLeft = 5 - $_SESSION['login_attempts'];
+                        $error = "Invalid credentials. ($attemptsLeft attempts remaining)";
+                    }
                 }
             }
         }
@@ -93,6 +97,7 @@ include __DIR__ . '/../includes/auth_header.php';
             <?php endif; ?>
 
             <form method="POST" action="" id="loginForm" class="needs-validation" novalidate>
+                <?= csrfInput() ?>
                 <div class="form-floating mb-3">
                     <input type="email" name="email" id="email" class="form-control rounded-3" 
                            value="<?= htmlspecialchars($email ?? '') ?>" placeholder="name@example.com" autofocus required>

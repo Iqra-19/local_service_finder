@@ -24,6 +24,32 @@
       </script>
     <?php endif; ?>
 
+    <?php
+    $unreadCount = 0;
+    if (isset($_SESSION['user_id'])) {
+        require_once __DIR__ . '/../config/db.php';
+        try {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+            $stmt->execute([$_SESSION['user_id']]);
+            $unreadCount = (int)$stmt->fetchColumn();
+        } catch (Exception $e) {
+            $unreadCount = 0;
+        }
+    }
+    ?>
+
+    <!-- Notification Icon with Badge -->
+    <div class="position-relative me-2">
+      <a href="support_messages.php" class="text-secondary fs-5 position-relative text-decoration-none" title="Notifications & Support">
+        <i class="bi bi-bell-fill"></i>
+        <?php if ($unreadCount > 0): ?>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+            <?= $unreadCount ?>
+          </span>
+        <?php endif; ?>
+      </a>
+    </div>
+
     <div class="user-info d-flex align-items-center gap-2">
       <span class="text-muted fw-medium"><?= htmlspecialchars($userName ?? 'Guest') ?></span>
       <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 38px; height: 38px;">
@@ -32,3 +58,4 @@
     </div>
   </div>
 </div>
+

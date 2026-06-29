@@ -21,37 +21,41 @@ if (!$service) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $bookingDate = trim($_POST['booking_date'] ?? '');
-    $notes = trim($_POST['notes'] ?? '');
-
-    if (empty($bookingDate)) {
-        setFlash('danger', 'Please select a booking date.');
-    } elseif (strtotime($bookingDate) < strtotime('today')) {
-        setFlash('danger', 'Booking date cannot be in the past.');
+    if (!verifyCsrfToken()) {
+        setFlash('danger', 'Invalid CSRF security token. Please try again.');
     } else {
-        // Prevent booking own service (though unlikely if provider_id differs from user session, but as a safety check)
-        if ($service['provider_id'] === $_SESSION['user_id']) {
-            setFlash('danger', 'You cannot book your own service.');
-        } else {
-            // Check for duplicate pending/accepted booking
-            $checkStmt = $pdo->prepare("SELECT id FROM bookings WHERE user_id = ? AND service_id = ? AND booking_date = ? AND booking_status IN ('pending', 'accepted')");
-            $checkStmt->execute([$_SESSION['user_id'], $serviceId, $bookingDate]);
+        $bookingDate = trim($_POST['booking_date'] ?? '');
+        $notes = trim($_POST['notes'] ?? '');
 
-            if ($checkStmt->fetch()) {
-                setFlash('danger', 'You already have an active booking for this service on that date.');
+        if (empty($bookingDate)) {
+            setFlash('danger', 'Please select a booking date.');
+        } elseif (strtotime($bookingDate) < strtotime('today')) {
+            setFlash('danger', 'Booking date cannot be in the past.');
+        } else {
+            // Prevent booking own service (though unlikely if provider_id differs from user session, but as a safety check)
+            if ($service['provider_id'] === $_SESSION['user_id']) {
+                setFlash('danger', 'You cannot book your own service.');
             } else {
-                $insertStmt = $pdo->prepare("INSERT INTO bookings (user_id, provider_id, service_id, booking_date, notes, booking_status) VALUES (?, ?, ?, ?, ?, 'pending')");
-                $insertStmt->execute([
-                    $_SESSION['user_id'],
-                    $service['provider_id'],
-                    $serviceId,
-                    $bookingDate,
-                    htmlspecialchars($notes, ENT_QUOTES, 'UTF-8')
-                ]);
-                $bookingId = $pdo->lastInsertId();
-                setFlash('success', 'Booking request submitted successfully! Payment option will be enabled once the service provider accepts your request.');
-                header('Location: booking_history.php');
-                exit;
+                // Check for duplicate pending/accepted booking
+                $checkStmt = $pdo->prepare("SELECT id FROM bookings WHERE user_id = ? AND service_id = ? AND booking_date = ? AND booking_status IN ('pending', 'accepted')");
+                $checkStmt->execute([$_SESSION['user_id'], $serviceId, $bookingDate]);
+
+                if ($checkStmt->fetch()) {
+                    setFlash('danger', 'You already have an active booking for this service on that date.');
+                } else {
+                    $insertStmt = $pdo->prepare("INSERT INTO bookings (user_id, provider_id, service_id, booking_date, notes, booking_status) VALUES (?, ?, ?, ?, ?, 'pending')");
+                    $insertStmt->execute([
+                        $_SESSION['user_id'],
+                        $service['provider_id'],
+                        $serviceId,
+                        $bookingDate,
+                        htmlspecialchars($notes, ENT_QUOTES, 'UTF-8')
+                    ]);
+                    $bookingId = $pdo->lastInsertId();
+                    setFlash('success', 'Booking request submitted successfully! Payment option will be enabled once the service provider accepts your request.');
+                    header('Location: booking_history.php');
+                    exit;
+                }
             }
         }
     }
@@ -91,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="card-body p-4">
                         <form method="POST" action="">
+                            <?= csrfInput() ?>
                             <div class="mb-4">
                                 <label for="booking_date" class="form-label fw-semibold">Preferred Date</label>
                                 <input type="date" class="form-control form-control-lg" id="booking_date" name="booking_date"

@@ -1,18 +1,17 @@
 # Local Service Finder 🛠️
 
-A modern, robust Local Service Marketplace built with **Core PHP**, **MySQL**, and **Bootstrap 5**. This platform connects local service providers with customers, managing the entire lifecycle of booking requests, peer-to-peer messaging, geolocation-based searches, and service reviews.
+A modern, robust Local Service Marketplace built with **Core PHP**, **MySQL**, and **Bootstrap 5**. This platform connects local service providers with customers, managing the entire lifecycle of booking requests, peer-to-peer messaging, geolocation-based searches, secure payments, and service reviews.
 
 ---
 
 ## 🚀 Recruiter Quick Start (Demo Sandbox)
 
-To make evaluating this application as frictionless as possible, the login screen is pre-configured with a **HERO Provider** account that simulates a mature, 3-month-old service business:
+To make evaluating this application as frictionless as possible, the login screen is pre-configured with demo credentials for quick access:
 
 - **Demo URL:** `http://localhost/local_service_finder/pages/login.php`
 - **Prefilled Account Credentials:**
   - **Email:** `volt.repair@services.com`
   - **Password:** `Password123`
-- **Manual Setup Guide:** To populate the complete interconnected database (reviews, messages, rejections, pending actions, and maps), follow the step-by-step checklist in [demo_creation_guide.md](file:///C:/Users/iqrat/.gemini/antigravity-ide/brain/e5f354b0-4024-4bd5-9057-243e5fdd3863/demo_creation_guide.md).
 
 ---
 
@@ -23,7 +22,8 @@ To make evaluating this application as frictionless as possible, the login scree
 - **Geographical Search & Filters:** Browse services nearby using Leaflet maps. Customers can filter by keyword, category, or distance radius, with results sorted by price, rating, or proximity.
 - **Interactive Map Integration:** Real-time distance calculations and map markers showing nearby providers. Hovering over service listings highlights the corresponding map pin.
 - **Seamless Service Booking:** Request appointments for future dates with customized requirements and notes.
-- **P2P Messaging Interface:** Asynchronous peer-to-peer messaging with providers to negotiate pricing, finalize arrival times, or coordinate details. Designed to run efficiently on shared hosting (like InfinityFree) using resource-friendly adaptive polling.
+- **P2P Messaging Interface:** Asynchronous peer-to-peer messaging with providers to negotiate pricing, finalize arrival times, or coordinate details. Designed to run efficiently on shared hosting using resource-friendly adaptive polling.
+- **Simulated Payment Gateway:** Pay for accepted services securely with simulated UPI, Credit/Debit Card, Net Banking, or Wallet options with instant invoice receipt generation.
 - **Review & Rating Engine:** Rate completed services from 1 to 5 stars with comment logs to build community trust.
 
 ### 💼 Provider Features
@@ -31,7 +31,7 @@ To make evaluating this application as frictionless as possible, the login scree
 - **Interactive Business Dashboard:** Monitor active services, track cumulative earnings, check operational metrics (Acceptance Rate and Completion Rate), and view monthly earnings trend lines.
 - **Service Management (CRUD):** Add, edit, or disable services, set customized pricing, upload showcase photos, and pin precise service locations on the map.
 - **Real-time Queue Management:** Accept or reject incoming booking requests with automatic customer status updates.
-- **Dynamic Notifications:** Red unread message badges alert the provider of incoming messages.
+- **Real-Time Unread Notification Badge:** Topbar notification bell dynamically alerts users to new unread system messages and updates.
 
 ---
 
@@ -40,19 +40,20 @@ To make evaluating this application as frictionless as possible, the login scree
 This application was engineered with a focus on web application security, clean database design, and smooth user interactions:
 
 1. **Prepared SQL Statements (PDO):** Complete defense against SQL Injection (SQLi) vulnerabilities across all read and write queries.
-2. **Secure Password Hashing:** User passwords are encrypted using `bcrypt` (default Blowfish algorithm with custom safety parameters) at registration.
-3. **Session Integrity & Protection:** Defensive session validations, login rate-limiting, and automatic lockout mechanics to prevent brute-force attacks.
-4. **Role-Based Access Control (RBAC):** Strict separation of customer (`user`) and service provider (`provider`) routes. Attempting to access dashboard files without appropriate credentials triggers an instant redirection.
-5. **Cascading Relational Integrity:** Built-in MySQL foreign keys ensure that deletions (e.g., deleting a service or user) cascade gracefully without leaving dangling or orphan rows.
-6. **Asynchronous UI (Fetch AJAX):** Search filtering, sorting, map pins, and messages update dynamically without page reloads, utilizing an adaptive backoff polling algorithm to conserve hosting resources.
+2. **Cross-Site Request Forgery (CSRF) Defenses:** Hidden CSRF token verification (`csrfInput()`, `verifyCsrfToken()`) implemented across state-changing POST requests.
+3. **Session Hardening & Cookie Protection:** Enforced `httponly = true`, `SameSite = Lax`, and defensive session regeneration to protect against session hijacking and XSS cookie theft.
+4. **Secure Password Hashing:** User passwords encrypted using `bcrypt` (default Blowfish algorithm with custom safety parameters).
+5. **Role-Based Access Control (RBAC):** Strict separation of customer (`user`), service provider (`provider`), and administrative (`admin`) routes.
+6. **Double-Submission Protection & Loading UX:** Automatic JavaScript button disabling and spinner states (`Processing...`) on form submissions to prevent accidental duplicate entries.
+7. **Cascading Relational Integrity:** Built-in MySQL foreign keys ensure that deletions cascade gracefully without orphan rows.
 
 ---
 
 ## 💻 Tech Stack
 
 - **Backend Engine:** Core PHP 8.x (Object-Oriented Database connection via PDO)
-- **Database Layer:** MySQL (Structured Relational Schema)
-- **Frontend Design:** HTML5, Modern CSS3, Bootstrap 5.3 (featuring clean glassmorphism accents)
+- **Database Layer:** MySQL (Structured Relational Schema with InnoDB engine)
+- **Frontend Design:** HTML5, Modern CSS3, Bootstrap 5.3 (featuring glassmorphism accents)
 - **Interactivity:** Vanilla JavaScript (ES6+), Fetch API (asynchronous communication)
 - **Map Engine:** Leaflet.js & OpenStreetMap API
 
@@ -100,10 +101,12 @@ http://localhost/local_service_finder
 
 ## 🗄️ Database Schema Relationships
 
-The database is built on 5 relational tables:
+The database is built on relational tables indexed for high-performance querying:
 
-- `users` — Stores account details, coordinates (latitude/longitude), and role flags.
-- `services` — Maps service titles, categories, pricing, descriptions, images, and locations.
-- `bookings` — Bridge table connecting users, providers, and services under 5 status states (`pending`, `accepted`, `completed`, `rejected`, `cancelled`).
-- `reviews` — Logs rating scores and customer text feedback linked to completed bookings.
-- `messages` — Handles peer-to-peer message logs with a read status indicator.
+- `users` — Stores account details, coordinates (latitude/longitude), Google OAuth IDs, and role flags (`user`, `provider`, `admin`).
+- `services` — Maps service titles, categories, pricing, descriptions, images, and geolocation points.
+- `bookings` — Bridge table connecting users, providers, and services under lifecycle status states (`pending`, `accepted`, `completed`, `rejected`, `cancelled`).
+- `payments` — Records payment transactions, amounts, methods (UPI, Card, NetBanking), and unique transaction IDs.
+- `reviews` — Logs rating scores (1-5 stars) and customer text feedback linked to completed bookings.
+- `messages` — Handles peer-to-peer message logs between customers and service providers.
+- `notifications` — Tracks system alerts and unread notifications per user.

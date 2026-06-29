@@ -8,39 +8,43 @@ if (isLoggedIn()) redirectByRole();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
-    $role = $_POST['role'] ?? 'user';
-
-    if (!$name || !$email || !$password) {
-        $error = 'All primary fields are required.';
-    } elseif (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
-        $error = 'Name can only contain letters and spaces.';
-    } elseif (mb_strlen($name) < 2 || mb_strlen($name) > 100) {
-        $error = 'Name must be between 2 and 100 characters.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address.';
-    } elseif (mb_strlen($password) < 8 || !preg_match("/[a-zA-Z]/", $password) || !preg_match("/[0-9]/", $password)) {
-        $error = 'Password must be at least 8 chars, 1 letter, and 1 number.';
-    } elseif ($password !== $confirm) {
-        $error = 'Passwords do not match.';
-    } elseif (!in_array($role, ['user', 'provider'])) {
-        $error = 'Invalid role selected.';
+    if (!verifyCsrfToken()) {
+        $error = 'Invalid CSRF security token. Please refresh and try again.';
     } else {
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
-        $stmt->execute([$email]);
-        if ($stmt->fetch()) {
-            $error = 'Email is already registered. Please login.';
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirm = $_POST['confirm_password'] ?? '';
+        $role = $_POST['role'] ?? 'user';
+
+        if (!$name || !$email || !$password) {
+            $error = 'All primary fields are required.';
+        } elseif (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
+            $error = 'Name can only contain letters and spaces.';
+        } elseif (mb_strlen($name) < 2 || mb_strlen($name) > 100) {
+            $error = 'Name must be between 2 and 100 characters.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Please enter a valid email address.';
+        } elseif (mb_strlen($password) < 8 || !preg_match("/[a-zA-Z]/", $password) || !preg_match("/[0-9]/", $password)) {
+            $error = 'Password must be at least 8 chars, 1 letter, and 1 number.';
+        } elseif ($password !== $confirm) {
+            $error = 'Passwords do not match.';
+        } elseif (!in_array($role, ['user', 'provider'])) {
+            $error = 'Invalid role selected.';
         } else {
-            $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
-            $stmt = $pdo->prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)');
-            $stmt->execute([$name, $email, $hash, $role]);
-            
-            setFlash('success', 'Registration successful! You can now authenticate securely.');
-            header("Location: login.php");
-            exit;
+            $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $error = 'Email is already registered. Please login.';
+            } else {
+                $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+                $stmt = $pdo->prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)');
+                $stmt->execute([$name, $email, $hash, $role]);
+                
+                setFlash('success', 'Registration successful! You can now authenticate securely.');
+                header("Location: login.php");
+                exit;
+            }
         }
     }
 }
@@ -67,6 +71,7 @@ include __DIR__ . '/../includes/auth_header.php';
             <?php endif; ?>
 
             <form method="POST" action="" id="registerForm" class="needs-validation" novalidate oninput='confirm_password.setCustomValidity(confirm_password.value != password.value ? "Passwords do not match." : "")'>
+                <?= csrfInput() ?>
                 
                 <div class="form-floating mb-3">
                     <input type="text" name="name" id="name" class="form-control rounded-3" 

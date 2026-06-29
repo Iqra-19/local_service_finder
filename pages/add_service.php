@@ -11,54 +11,58 @@ $success = '';
 $categories = ['Plumbing', 'Electrical', 'Cleaning', 'Painting', 'Carpentry', 'Landscaping', 'Moving', 'Tutoring', 'IT Support', 'General'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $price = $_POST['price'] ?? '';
-    $category = trim($_POST['category'] ?? '');
-    $location = trim($_POST['location'] ?? '');
-    $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : null;
-    $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : null;
-    
-    $imageFile = $_FILES['image'] ?? null;
-    $imageName = 'default_service.jpg';
+    if (!verifyCsrfToken()) {
+        $errors[] = 'Invalid CSRF security token. Please try again.';
+    } else {
+        $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $price = $_POST['price'] ?? '';
+        $category = trim($_POST['category'] ?? '');
+        $location = trim($_POST['location'] ?? '');
+        $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : null;
+        $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : null;
+        
+        $imageFile = $_FILES['image'] ?? null;
+        $imageName = 'default_service.jpg';
 
-    // Validation
-    if (empty($title) || mb_strlen($title) > 150) {
-        $errors[] = 'Title is required and must be under 150 characters.';
-    }
-    if (mb_strlen($description) > 2000) {
-        $errors[] = 'Description must be under 2000 characters.';
-    }
-    if (!is_numeric($price) || $price < 0 || $price > 999999.99) {
-        $errors[] = 'Price must be a valid number between 0 and 999999.99.';
-    }
-    if (empty($category) || !in_array($category, $categories)) {
-        $errors[] = 'Please select a valid category.';
-    }
-    
-    // Handle Image Upload
-    if (empty($errors) && $imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!in_array($imageFile['type'], $allowedTypes)) {
-            $errors[] = 'Only JPG, PNG, and WEBP images are allowed.';
-        } else {
-            $ext = pathinfo($imageFile['name'], PATHINFO_EXTENSION);
-            $imageName = uniqid() . '.' . $ext;
-            $uploadPath = __DIR__ . '/../uploads/' . $imageName;
-            if (!move_uploaded_file($imageFile['tmp_name'], $uploadPath)) {
-                $errors[] = 'Failed to upload image.';
+        // Validation
+        if (empty($title) || mb_strlen($title) > 150) {
+            $errors[] = 'Title is required and must be under 150 characters.';
+        }
+        if (mb_strlen($description) > 2000) {
+            $errors[] = 'Description must be under 2000 characters.';
+        }
+        if (!is_numeric($price) || $price < 0 || $price > 999999.99) {
+            $errors[] = 'Price must be a valid number between 0 and 999999.99.';
+        }
+        if (empty($category) || !in_array($category, $categories)) {
+            $errors[] = 'Please select a valid category.';
+        }
+        
+        // Handle Image Upload
+        if (empty($errors) && $imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!in_array($imageFile['type'], $allowedTypes)) {
+                $errors[] = 'Only JPG, PNG, and WEBP images are allowed.';
+            } else {
+                $ext = pathinfo($imageFile['name'], PATHINFO_EXTENSION);
+                $imageName = uniqid() . '.' . $ext;
+                $uploadPath = __DIR__ . '/../uploads/' . $imageName;
+                if (!move_uploaded_file($imageFile['tmp_name'], $uploadPath)) {
+                    $errors[] = 'Failed to upload image.';
+                }
             }
         }
-    }
 
-    if (empty($errors)) {
-        try {
-            $stmt = $pdo->prepare("INSERT INTO services (provider_id, title, description, price, category, location, latitude, longitude, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$_SESSION['user_id'], $title, $description, $price, $category, $location, $latitude, $longitude, $imageName]);
-            $success = 'Service added successfully!';
-            $title = $description = $price = $category = $location = $latitude = $longitude = '';
-        } catch (PDOException $e) {
-            $errors[] = 'Database error. Please try again.';
+        if (empty($errors)) {
+            try {
+                $stmt = $pdo->prepare("INSERT INTO services (provider_id, title, description, price, category, location, latitude, longitude, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$_SESSION['user_id'], $title, $description, $price, $category, $location, $latitude, $longitude, $imageName]);
+                $success = 'Service added successfully!';
+                $title = $description = $price = $category = $location = $latitude = $longitude = '';
+            } catch (PDOException $e) {
+                $errors[] = 'Database error. Please try again.';
+            }
         }
     }
 }
@@ -93,6 +97,7 @@ $provLoc = $providerInfo['location'] ?? '';
     <div class="card">
       <div class="card-body">
         <form method="POST" enctype="multipart/form-data" novalidate id="serviceForm">
+          <?= csrfInput() ?>
           <div class="mb-3">
             <label for="title" class="form-label">Service Title <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="title" name="title" maxlength="150" value="<?= htmlspecialchars($title ?? '') ?>" required>
