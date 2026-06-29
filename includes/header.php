@@ -1,9 +1,10 @@
+<?php require_once __DIR__ . '/../config/session.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?? 'Local Service Finder - Professional On-Demand Services' ?></title>
+    <title><?= htmlspecialchars(isset($pageTitle) ? (strpos($pageTitle, 'Local Service Provider') === 0 ? $pageTitle : "Local Service Provider | " . $pageTitle) : "Local Service Provider | Home") ?></title>
     <!-- Google Fonts: Inter & Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,9 +14,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Core Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/local_service_finder/assets/css/style.css" rel="stylesheet">
+    <link href="<?= getBaseUrl() ?>/assets/css/style.css" rel="stylesheet">
     <?php if (isset($isLanding) && $isLanding): ?>
-        <link href="/local_service_finder/assets/css/landing.css" rel="stylesheet">
+        <link href="<?= getBaseUrl() ?>/assets/css/landing.css" rel="stylesheet">
     <?php endif; ?>
 </head>
 <body class="<?= $bodyClass ?? '' ?>">

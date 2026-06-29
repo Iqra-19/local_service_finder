@@ -9,11 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $idToken = $_POST['credential'] ?? '';
-$requestedRole = $_POST['role'] ?? 'user';
-
-if (!in_array($requestedRole, ['user', 'provider'])) {
-    $requestedRole = 'user';
-}
+$hasExplicitRole = isset($_POST['role']) && in_array($_POST['role'], ['user', 'provider']);
+$requestedRole = $hasExplicitRole ? $_POST['role'] : null;
 
 if (empty($idToken)) {
     setFlash('danger', 'Google authentication failed: Missing credential token.');
@@ -75,7 +72,18 @@ try {
         redirectByRole();
     }
 
-    // 3. Create a new user account via Google
+    // 3. New User: If role was not explicitly chosen during signup, prompt for account type
+    if (!$hasExplicitRole) {
+        $_SESSION['pending_google_user'] = [
+            'google_id' => $googleId,
+            'email' => $email,
+            'name' => $name
+        ];
+        header('Location: select_role.php');
+        exit;
+    }
+
+    // 4. Create new user account with explicit role
     $insert = $pdo->prepare('INSERT INTO users (name, email, google_id, role) VALUES (?, ?, ?, ?)');
     $insert->execute([$name, $email, $googleId, $requestedRole]);
     $newUserId = $pdo->lastInsertId();
@@ -88,7 +96,7 @@ try {
     $_SESSION['login_attempts'] = 0;
     $_SESSION['login_lockout'] = 0;
 
-    setFlash('success', 'Account created successfully with Google! Welcome to Local Service Finder.');
+    setFlash('success', 'Account created successfully with Google! Welcome to Local Service Provider.');
     redirectByRole();
 
 } catch (PDOException $e) {

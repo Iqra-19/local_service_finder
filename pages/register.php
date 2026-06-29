@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Secure Registration';
+$pageTitle = 'Register';
 include __DIR__ . '/../includes/auth_header.php';
 ?>
 

@@ -10,22 +10,26 @@ $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $location = trim($_POST['location'] ?? '');
-    $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : null;
-    $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : null;
-
-    if (empty($name) || empty($email)) {
-        $error = 'Name and email are required.';
+    if (!verifyCsrfToken()) {
+        $error = 'Invalid CSRF security token. Please try again.';
     } else {
-        try {
-            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, location = ?, latitude = ?, longitude = ? WHERE id = ?");
-            $stmt->execute([$name, $email, $location, $latitude, $longitude, $userId]);
-            $_SESSION['user_name'] = $name;
-            $success = 'Profile updated successfully.';
-        } catch (PDOException $e) {
-            $error = 'Email already in use.';
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $location = trim($_POST['location'] ?? '');
+        $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? floatval($_POST['latitude']) : null;
+        $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? floatval($_POST['longitude']) : null;
+
+        if (empty($name) || empty($email)) {
+            $error = 'Name and email are required.';
+        } else {
+            try {
+                $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, location = ?, latitude = ?, longitude = ? WHERE id = ?");
+                $stmt->execute([$name, $email, $location, $latitude, $longitude, $userId]);
+                $_SESSION['user_name'] = $name;
+                $success = 'Profile updated successfully.';
+            } catch (PDOException $e) {
+                $error = 'Email already in use.';
+            }
         }
     }
 }
@@ -53,6 +57,7 @@ $user = $stmt->fetch();
               <div class="alert alert-danger"><?= $error ?></div>
             <?php endif; ?>
             <form method="POST" id="profileForm">
+              <?= csrfInput() ?>
               <div class="mb-3">
                 <label class="form-label">Full Name</label>
                 <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" required>

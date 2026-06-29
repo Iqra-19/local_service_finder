@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Admin - Payment Transactions';
+$pageTitle = 'Admin Dashboard';
 require_once __DIR__ . '/../includes/dashboard_header.php';
 requireRole('admin');
 require_once __DIR__ . '/../config/db.php';

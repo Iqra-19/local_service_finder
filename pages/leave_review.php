@@ -39,24 +39,28 @@ if ($checkStmt->fetch()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $rating = filter_input(INPUT_POST, 'rating', FILTER_VALIDATE_INT);
-    $comment = trim($_POST['comment'] ?? '');
-
-    if (!$rating || $rating < 1 || $rating > 5) {
-        setFlash('danger', 'Please provide a valid rating between 1 and 5.');
+    if (!verifyCsrfToken()) {
+        setFlash('danger', 'Invalid CSRF security token. Please try again.');
     } else {
-        $insertStmt = $pdo->prepare("INSERT INTO reviews (booking_id, user_id, provider_id, service_id, rating, comment) VALUES (?, ?, ?, ?, ?, ?)");
-        $insertStmt->execute([
-            $bookingId,
-            $_SESSION['user_id'],
-            $booking['provider_id'],
-            $booking['service_id'],
-            $rating,
-            htmlspecialchars($comment, ENT_QUOTES, 'UTF-8')
-        ]);
-        setFlash('success', 'Thank you! Your review has been submitted.');
-        header('Location: booking_history.php');
-        exit;
+        $rating = filter_input(INPUT_POST, 'rating', FILTER_VALIDATE_INT);
+        $comment = trim($_POST['comment'] ?? '');
+
+        if (!$rating || $rating < 1 || $rating > 5) {
+            setFlash('danger', 'Please provide a valid rating between 1 and 5.');
+        } else {
+            $insertStmt = $pdo->prepare("INSERT INTO reviews (booking_id, user_id, provider_id, service_id, rating, comment) VALUES (?, ?, ?, ?, ?, ?)");
+            $insertStmt->execute([
+                $bookingId,
+                $_SESSION['user_id'],
+                $booking['provider_id'],
+                $booking['service_id'],
+                $rating,
+                htmlspecialchars($comment, ENT_QUOTES, 'UTF-8')
+            ]);
+            setFlash('success', 'Thank you! Your review has been submitted.');
+            header('Location: booking_history.php');
+            exit;
+        }
     }
 }
 ?>
@@ -73,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-body p-4">
                         <h4 class="mb-4"><?= htmlspecialchars($booking['service_title']) ?></h4>
                         <form method="POST">
+                            <?= csrfInput() ?>
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Rating</label>
                                 <select name="rating" class="form-select form-select-lg" required>

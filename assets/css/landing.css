@@ -134,6 +134,7 @@ h1, h2, h3, h4, h5, h6, .brand-text {
 
 .hero-image-wrapper {
   position: relative;
+  padding: 15px 0;
 }
 
 .hero-main-img {
@@ -145,24 +146,24 @@ h1, h2, h3, h4, h5, h6, .brand-text {
 .floating-badge {
   position: absolute;
   background: #ffffff;
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-radius: 16px;
-  box-shadow: 0 20px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.12);
   display: flex;
   align-items: center;
   gap: 12px;
   animation: float 4s ease-in-out infinite;
-  z-index: 2;
+  z-index: 10;
 }
 
 .floating-badge-1 {
-  top: 10%;
-  left: -20px;
+  top: 25px;
+  left: -15px;
 }
 
 .floating-badge-2 {
-  bottom: 12%;
-  right: -20px;
+  bottom: 25px;
+  right: -15px;
   animation-delay: 2s;
 }
 

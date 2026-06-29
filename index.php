@@ -6,7 +6,7 @@ if (isLoggedIn() && (!isset($_GET['view']) || $_GET['view'] !== 'landing')) {
     redirectByRole();
 }
 
-$pageTitle = "Local Service Finder - Book Verified Local Professionals Near You";
+$pageTitle = "Home";
 $isLanding = true;
 include __DIR__ . '/includes/header.php';
 ?>
